@@ -1,0 +1,14 @@
+Head = 0x3a8;
+Breast = 0x3b0;
+Root = 0x3bc;
+hip = 0x3ac;
+LeftHand = 0x3e8;
+RightHand = 0x3e4;
+LeftShoulder = 0x3dc;
+RightShoulder = 0x3e0;
+LeftFoot = 0x3d0;
+RightFoot = 0x3cc;
+LeftLeg = 0x3c8;
+RightLeg = 0x3c4;
+rightankle = 0x3ec;
+leftankle = 0x3f0;

@@ -1,0 +1,56 @@
+namespace DarknetHaxor
+{
+    internal static class Offsets
+    {
+
+        // General
+        internal static uint CurrentMatch = 0x50;
+        internal static uint MatchStatus = 0x3c;
+        internal static uint LocalPlayer = 0x44;
+        internal static uint DictionaryEntities = 0x68;
+
+        // Player
+        internal static uint Player_IsDead = 0x4c;
+        internal static uint Player_Name = 0x23c;
+        internal static uint Player_Data = 0x44;
+        internal static uint Player_ShadowBase = 0x1474;
+        internal static uint XPose = 0x78;
+        internal static uint AvatarManager = 0x410;
+        internal static uint Avatar = 0x18;
+        internal static uint Avatar_IsVisible = 0x7c;
+        internal static uint Avatar_Data = 0x10;
+        internal static uint Avatar_Data_IsTeam = 0x49;
+
+        // Camera
+        internal static uint FollowCamera = 0x3a0;
+        internal static uint Camera = 0x14;
+        internal static uint AimRotation = 0x358;
+        internal static uint MainCameraTransform = 0x1c0;
+
+        // Armas
+        internal static uint Weapon = 0x34c;
+        internal static uint WeaponData = 0x54;
+        internal static uint WeaponRecoil = 0xc;
+        internal static uint ViewMatrixV1 = 0x98;
+        internal static uint ViewMatrixV2 = 0x24;
+
+        // Silent Aim
+        internal static uint sAim1 = 0x490;
+        internal static uint sAim2 = 0x85c;
+        internal static uint sAim3 = 0x38;
+        internal static uint sAim4 = 0x2c;
+
+        // ESP IN OBSERVE
+        internal static uint CurrentObserver = 0x60;
+        internal static uint ObserverPlayer = 0x24;
+        internal static uint NoReload = 0x89;
+        internal static uint PlayerAttributes = 0x40c;
+
+        // Aimbot Visible
+        internal static uint AimbotVisible = 0x3f4;
+
+        // Speed Internal
+        internal static uint GameTimer = 0x10;
+        internal static uint FixedDeltaTime = 0x24;
+    }
+}
