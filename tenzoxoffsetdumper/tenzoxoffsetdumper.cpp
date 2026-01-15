@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -10,8 +10,7 @@
 
 class TenzoXOffsetDumper {
 private:
-    // all the stuff we gona search in dump, class, field, name we call it
-    std::vector<std::tuple<std::string, std::string, std::string>> targets = {
+    std::vector<std::tuple<std::string, std::string, std::string>> targets_normal = {
         {"MatchGame", "m_Match", "CurrentMatch"},
         {"Match", "m_State", "MatchStatus"},
         {"Match", "m_LocalPlayer", "LocalPlayer"},
@@ -32,7 +31,9 @@ private:
         {"Player", "<m_AimRotation>k__BackingField", "AimRotation"},
         {"Player", "MainCameraTransform", "MainCameraTransform"},
         {"Player", "ActiveUISightingWeapon", "Weapon"},
+        {"Player", "m_WeaponData", "Player_WeaponData"},
         {"Weapon", "<FireComponent>k__BackingField", "WeaponData"},
+        {"WeaponData", "IntWeaponType", "IntWeaponType"},
         {"WeaponFireComponentLongRangeBase", "tangentTheta", "WeaponRecoil"},
         {"UGCAPIGenerate", "<>f__mg$cache26", "ViewMatrixV1"},
         {"UGCAPIGenerate", "<>f__mg$cache9", "ViewMatrixV2"},
@@ -49,8 +50,37 @@ private:
         {"TimeService", "m_FixedDeltaTime", "FixedDeltaTime"}
     };
 
-    // bones list, same format
-    std::vector<std::tuple<std::string, std::string, std::string>> bones_targets = {
+    std::vector<std::tuple<std::string, std::string, std::string>> targets_encrypted = {
+        {"MatchGame", "m_Match", "CurrentMatch"},
+        {"NFJPHMKKEBF", "LICPHHNNPPF ILGECLEFCCO", "MatchStatus"},
+        {"NFJPHMKKEBF", "Player FJPEHEGICBO", "LocalPlayer"},
+        {"AttackableEntity", "bool FHMPKFMFEPM", "Player_IsDead"},
+        {"Player", "string OIAJCBLDHKP", "Player_Name"},
+        {"PlayerNetwork.HHCBNAPCKHF", "FBCAHNCLMDC ADFIDIPODGK", "XPose"},
+        {"Player", "AvatarManager FOGJNGDMJKJ", "AvatarManager"},
+        {"AvatarManager", "IUmaAvatar EEAGBKBMBLD", "Avatar"},
+        {"Player", "FollowCamera CHDOHNOEBML", "FollowCamera"},
+        {"Player", "Quaternion <KCFEHMAIINO>k__BackingField", "AimRotation"},
+        {"Player", "GPBDEDFKJNA ActiveUISightingWeapon", "Weapon"},
+        {"Player", "int KDKFDCPBIGE", "Player_WeaponData"},
+        {"GPBDEDFKJNA", "CHEJCCHHDMH <NOAOCMKGLAH>k__BackingField", "WeaponData"},
+        {"GPBDEDFKJNA", "OOIPMACFIFL LAEMLAPIAFD", "IntWeaponType"},
+        {"OACEDDHKLIM", "float EFMCDHABKGP", "WeaponRecoil"},
+        {"Player", "bool <LPEIEILIKGC>k__BackingField", "sAim1"},
+        {"Player", "MADMMIICBNN GEGFCFDGGGP", "sAim2"},
+        {"MADMMIICBNN", "Vector3 BOGOIAMJFDN", "sAim3"},
+        {"MADMMIICBNN", "Vector3 NHKKHPLFMNG", "sAim4"},
+        {"NFJPHMKKEBF", "FNCMBMMKLLI BGGJJKKKFDC", "CurrentObserver"},
+        {"FNCMBMMKLLI", "Player NJMDHHGDNPJ", "ObserverPlayer"},
+        {"Player", "Collider HECFNHJKOMN", "AimbotVisible"},
+        {"UGCAPIGenerate", "<>f__mg$cache26", "ViewMatrixV1"},
+        {"UGCAPIGenerate", "<>f__mg$cache9", "ViewMatrixV2"},
+        {"PlayerAttributes", "ShootNoReload", "NoReload"},
+        {"TimeService", "m_DeltaTime", "GameTimer"},
+        {"TimeService", "m_FixedDeltaTime", "FixedDeltaTime"}
+    };
+
+    std::vector<std::tuple<std::string, std::string, std::string>> bones_normal = {
         {"Player", "HeadNode", "Head"},
         {"Player", "m_BloodEffectNode", "Breast"},
         {"Player", "m_RootNode", "Root"},
@@ -67,26 +97,42 @@ private:
         {"Player", "m_LeftForeArmNode", "leftankle"}
     };
 
-    // grouping labels for output so file look organized
+    std::vector<std::tuple<std::string, std::string, std::string>> bones_encrypted = {
+        {"Player", "OLCJOGDHJJJ", "head"},
+        {"Player", "OLJBCONDGLO", "hip"},
+        {"Player", "HCLMADAFLPD", "chest"},
+        {"Player", "MPJBGDJJJMJ", "root"},
+        {"Player", "BMGCHFGEDDA", "leftankle"},
+        {"Player", "AGHJLIMNPJA", "rightankle"},
+        {"Player", "FDMBKCKMODA", "lefttoe"},
+        {"Player", "CKABHDJDMAP", "righttoe"},
+        {"Player", "LIBEIIIAGIK", "leftshoulder"},
+        {"Player", "HDEPJIBNIIK", "rightshoulder"},
+        {"Player", "NJDDAPKPILB", "righthand"},
+        {"Player", "JHIBMHEMJOL", "lefthand"},
+        {"Player", "JBACCHNMGNJ", "rightforearm"},
+        {"Player", "FGECMMJKFNC", "leftforearm"}
+    };
+
     std::map<std::string, std::set<std::string>> group_labels = {
         {"// General", {"DictionaryEntities", "MatchStatus", "CurrentMatch", "LocalPlayer"}},
-        {"// Player", {"Player_Data", "Avatar_Data", "Avatar", "Player_Name", "CurrentMatch", "Player_IsDead", "Avatar_IsVisible", "Player_ShadowBase", "XPose", "AvatarManager", "Avatar_Data_IsTeam"}},
+        {"// Player", {"Player_Data", "Avatar_Data", "Avatar", "Player_Name", "CurrentMatch", "Player_IsDead", "Avatar_IsVisible", "Player_ShadowBase", "XPose", "AvatarManager", "Avatar_Data_IsTeam", "Player_WeaponData"}},
         {"// Camera", {"MainCameraTransform", "Camera", "FollowCamera", "AimRotation"}},
-        {"// Armas", {"WeaponData", "ViewMatrixV2", "WeaponRecoil", "Weapon", "ViewMatrixV1"}},
+        {"// Armas", {"WeaponData", "ViewMatrixV2", "WeaponRecoil", "Weapon", "ViewMatrixV1", "IntWeaponType"}},
         {"// Silent Aim", {"sAim2", "sAim3", "sAim4", "sAim1"}},
         {"// ESP IN OBSERVE", {"CurrentObserver", "ObserverPlayer"}},
         {"// Aimbot Visible", {"AimbotVisible"}},
         {"// Speed Internal", {"FixedDeltaTime", "GameTimer"}}
     };
 
+    bool isEncryptedMode = false;
+
 public:
-    // change console size so text fit nicer
     void setConsoleSize(int columns = 130, int lines = 30) {
         std::string command = "mode con: cols=" + std::to_string(columns) + " lines=" + std::to_string(lines);
         system(command.c_str());
     }
 
-    // type text slow for drama lol
     void typewrite(const std::string& text, int delay_ms = 50) {
         for (char c : text) {
             std::cout << c << std::flush;
@@ -95,7 +141,6 @@ public:
         std::cout << std::endl;
     }
 
-    // banner for program look cool
     void printBanner() {
         std::cout << "==============================================================" << std::endl;
         std::cout << "                   TENZO X OFFSET DUMPER" << std::endl;
@@ -103,7 +148,17 @@ public:
         std::cout << std::endl;
     }
 
-    // lowercase helper
+    void setEncryptionMode(bool encrypted) {
+        isEncryptedMode = encrypted;
+        if (encrypted) {
+            std::cout << "MODE: Encrypted dump mode selected" << std::endl;
+        }
+        else {
+            std::cout << "MODE: Normal dump mode selected" << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     std::string toLower(const std::string& str) {
         std::string result = str;
         for (char& c : result) {
@@ -112,7 +167,6 @@ public:
         return result;
     }
 
-    // trim spaces cus dumps messy
     std::string trim(const std::string& str) {
         size_t start = str.find_first_not_of(" \t\n\r");
         size_t end = str.find_last_not_of(" \t\n\r");
@@ -120,7 +174,6 @@ public:
         return str.substr(start, end - start + 1);
     }
 
-    // look in a line for field then find 0x after ; and return hex digits only
     std::string extractOffset(const std::string& line, const std::string& field) {
         size_t field_pos = line.find(field);
         if (field_pos == std::string::npos) {
@@ -134,7 +187,10 @@ public:
 
         size_t hex_pos = line.find("0x", semicolon_pos);
         if (hex_pos == std::string::npos) {
-            return "";
+            hex_pos = line.find("0x", field_pos);
+            if (hex_pos == std::string::npos) {
+                return "";
+            }
         }
 
         std::string hex_value;
@@ -151,7 +207,6 @@ public:
         return hex_value;
     }
 
-    // parse dump.cs and search for offsets using targets vector
     std::vector<std::pair<std::string, std::string>> extractOffsets(const std::string& filePath) {
         std::vector<std::pair<std::string, std::string>> extracted;
 
@@ -170,6 +225,8 @@ public:
 
         std::cout << "Reading " << lines.size() << " lines..." << std::endl;
 
+        const auto& targets = isEncryptedMode ? targets_encrypted : targets_normal;
+
         for (const auto& target : targets) {
             std::string class_def = std::get<0>(target);
             std::string field = std::get<1>(target);
@@ -182,42 +239,69 @@ public:
             for (const auto& current_line : lines) {
                 std::string trimmed_line = trim(current_line);
 
-                // try find class
-                if (!inside_class && trimmed_line.find("class " + class_def) != std::string::npos) {
-                    inside_class = true;
-                    brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
-                    continue;
+                if (!inside_class) {
+                    if (isEncryptedMode) {
+                        if (trimmed_line.find("class " + class_def) != std::string::npos ||
+                            trimmed_line.find("internal class " + class_def) != std::string::npos ||
+                            trimmed_line.find("public class " + class_def) != std::string::npos ||
+                            trimmed_line.find("private class " + class_def) != std::string::npos) {
+                            inside_class = true;
+                            brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
+                            continue;
+                        }
+                    }
+                    else {
+                        if (trimmed_line.find("class " + class_def) != std::string::npos) {
+                            inside_class = true;
+                            brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
+                            continue;
+                        }
+                    }
                 }
 
                 if (inside_class) {
                     brace_count += countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
 
-                    // left class
                     if (brace_count <= 0) {
                         inside_class = false;
                         continue;
                     }
 
-                    // look for field
-                    std::string offset = extractOffset(current_line, field);
+                    std::string offset;
+                    if (isEncryptedMode) {
+                        if (current_line.find(field) != std::string::npos) {
+                            offset = extractOffset(current_line, field);
+                        }
+                    }
+                    else {
+                        offset = extractOffset(current_line, field);
+                    }
+
                     if (!offset.empty()) {
                         extracted.push_back({ result_name, toLower(offset) });
                         found = true;
-                        std::cout << "FOUND: " << result_name << " = 0x" << offset << std::endl;
+                        std::cout << "FOUND: " << result_name << " = 0x" << offset;
+                        if (isEncryptedMode) {
+                            std::cout << " (Encrypted: " << class_def << "::" << field << ")";
+                        }
+                        std::cout << std::endl;
                         break;
                     }
                 }
             }
 
             if (!found) {
-                std::cout << "NOT FOUND: " << class_def << "::" << field << std::endl;
+                std::cout << "NOT FOUND: " << class_def << "::" << field;
+                if (isEncryptedMode) {
+                    std::cout << " (Encrypted mode)";
+                }
+                std::cout << std::endl;
             }
         }
 
         return extracted;
     }
 
-    // extract bones using bones_targets
     std::vector<std::pair<std::string, std::string>> extractBones(const std::string& filePath) {
         std::vector<std::pair<std::string, std::string>> extracted;
 
@@ -233,6 +317,8 @@ public:
         }
         file.close();
 
+        const auto& bones_targets = isEncryptedMode ? bones_encrypted : bones_normal;
+
         for (const auto& target : bones_targets) {
             std::string class_def = std::get<0>(target);
             std::string field = std::get<1>(target);
@@ -245,10 +331,23 @@ public:
             for (const auto& current_line : lines) {
                 std::string trimmed_line = trim(current_line);
 
-                if (!inside_class && trimmed_line.find("class " + class_def) != std::string::npos) {
-                    inside_class = true;
-                    brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
-                    continue;
+                if (!inside_class) {
+                    if (isEncryptedMode) {
+                        if (trimmed_line.find("class " + class_def) != std::string::npos ||
+                            trimmed_line.find("internal class " + class_def) != std::string::npos ||
+                            trimmed_line.find("public class " + class_def) != std::string::npos) {
+                            inside_class = true;
+                            brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
+                            continue;
+                        }
+                    }
+                    else {
+                        if (trimmed_line.find("class " + class_def) != std::string::npos) {
+                            inside_class = true;
+                            brace_count = countOccurrences(current_line, '{') - countOccurrences(current_line, '}');
+                            continue;
+                        }
+                    }
                 }
 
                 if (inside_class) {
@@ -259,25 +358,41 @@ public:
                         continue;
                     }
 
-                    std::string offset = extractOffset(current_line, field);
+                    std::string offset;
+                    if (isEncryptedMode) {
+                        if (current_line.find(field) != std::string::npos) {
+                            offset = extractOffset(current_line, field);
+                        }
+                    }
+                    else {
+                        offset = extractOffset(current_line, field);
+                    }
+
                     if (!offset.empty()) {
                         extracted.push_back({ result_name, toLower(offset) });
                         found = true;
-                        std::cout << "FOUND BONE: " << result_name << " = 0x" << offset << std::endl;
+                        std::cout << "FOUND BONE: " << result_name << " = 0x" << offset;
+                        if (isEncryptedMode) {
+                            std::cout << " (Encrypted: " << class_def << "::" << field << ")";
+                        }
+                        std::cout << std::endl;
                         break;
                     }
                 }
             }
 
             if (!found) {
-                std::cout << "BONE NOT FOUND: " << class_def << "::" << field << std::endl;
+                std::cout << "BONE NOT FOUND: " << class_def << "::" << field;
+                if (isEncryptedMode) {
+                    std::cout << " (Encrypted mode)";
+                }
+                std::cout << std::endl;
             }
         }
 
         return extracted;
     }
 
-    // write offsets to file with groups
     void writeOffsets(const std::vector<std::pair<std::string, std::string>>& extracted, const std::string& outputFile) {
         std::ofstream file(outputFile);
         if (!file.is_open()) {
@@ -285,7 +400,7 @@ public:
             return;
         }
 
-        file << "namespace DarknetHaxor\n";
+        file << "namespace TXC\n";
         file << "{\n";
         file << "    internal static class Offsets\n";
         file << "    {\n";
@@ -311,7 +426,6 @@ public:
         file.close();
     }
 
-    // write bones simple format
     void writeBones(const std::vector<std::pair<std::string, std::string>>& extracted, const std::string& outputFile) {
         std::ofstream file(outputFile);
         if (!file.is_open()) {
@@ -326,7 +440,6 @@ public:
     }
 
 private:
-    // little helper to count braces
     int countOccurrences(const std::string& str, char ch) {
         int count = 0;
         for (char c : str) {
@@ -335,7 +448,6 @@ private:
         return count;
     }
 
-    // find which group a name belong so we can put label in file
     std::string findGroup(const std::string& name) {
         for (const auto& group : group_labels) {
             if (group.second.find(name) != group.second.end()) {
@@ -349,19 +461,15 @@ private:
 int main() {
     TenzoXOffsetDumper dumper;
 
-    // set console big so text not wrap
     dumper.setConsoleSize(130, 30);
     system("title TENZO X OFFSET DUMPER");
 
-    // banner coz why not
     dumper.printBanner();
 
-    // ask for dump file path, user paste path
     std::string dumpFilePath;
     std::cout << "Enter the path to your dump.cs file: ";
     std::getline(std::cin, dumpFilePath);
 
-    // check file exist else bail
     std::ifstream testFile(dumpFilePath);
     if (!testFile.is_open()) {
         std::cout << std::endl;
@@ -378,7 +486,22 @@ int main() {
     std::cout << "SUCCESS: Found file: " << dumpFilePath << std::endl;
     std::cout << std::endl;
 
-    // some silly messages for user
+    std::cout << "Is this an ENCRYPTED dump file? (y/n): ";
+    std::string modeInput;
+    std::getline(std::cin, modeInput);
+
+    bool isEncrypted = false;
+    if (modeInput == "y" || modeInput == "Y" || modeInput == "yes" || modeInput == "YES") {
+        isEncrypted = true;
+        std::cout << "Using ENCRYPTED mode with obfuscated strings..." << std::endl;
+    }
+    else {
+        std::cout << "Using NORMAL mode with standard strings..." << std::endl;
+    }
+    std::cout << std::endl;
+
+    dumper.setEncryptionMode(isEncrypted);
+
     dumper.typewrite("Welcome to Tenzo X Offset Dumper!");
     Sleep(500);
 
@@ -388,7 +511,6 @@ int main() {
     std::cout << "Dumping Offsets..." << std::endl;
     std::cout << std::endl;
 
-    // get offsets and write file
     auto extracted = dumper.extractOffsets(dumpFilePath);
     dumper.writeOffsets(extracted, "offsets.txt");
 
@@ -400,7 +522,6 @@ int main() {
     std::cout << "Dumping Bones..." << std::endl;
     std::cout << std::endl;
 
-    // bones
     auto extractedBones = dumper.extractBones(dumpFilePath);
     dumper.writeBones(extractedBones, "bones.txt");
 
