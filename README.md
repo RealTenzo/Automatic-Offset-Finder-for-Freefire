@@ -31,7 +31,7 @@ A tool that scans your **dump.cs** file and automatically finds the latest **off
 ## Output Example
 
 ```csharp
-namespace DarknetHaxor
+namespace TXC
 {
     internal static class Offsets
     {
